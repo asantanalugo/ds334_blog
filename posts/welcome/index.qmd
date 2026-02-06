@@ -1,6 +1,6 @@
 ---
 title: "Welcome To My Blog"
-author: "Tristan O'Malley"
+author: "Alexa Santana"
 date: "2026-01-25"
 categories: [news]
 ---
