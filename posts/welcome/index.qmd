@@ -1,12 +1,98 @@
 ---
-title: "Welcome To My Blog"
+title: "Blog Post #1"
 author: "Alexa Santana"
-date: "2026-01-25"
-categories: [news]
+date: "2026-02-02"
+categories: [netflix, code, analysis]
+image: "image.jpg"
 ---
 
-This is the first post in a Quarto blog. Welcome!
+## Netflix Reports (Blog Post #1):
 
-![](thumbnail.jpg)
+Taken form the Tidy Tuesday GitHub (<https://github.com/rfordatascience/tidytuesday>) repository (Week 30 of 2025), the selected dataset looks at TV & Movie streaming data from Netflix. According to Tidy Tuesday, Netflix releases Engagement Reports which breakdown the amount of hours users have spent watching both Movies & TV Shows. In this blog post we will look at trying to visualize what are the most watched movies and TV shows in each report, and try to identify if the most watched shows / movies are american, or international!
 
-Since this post doesn't specify an explicit `image`, the first image in the post will be used in the listing page of posts.
+```{r}
+## loading in packages: 
+library(tidyverse)
+
+## loading in the data: 
+tuesdata <- tidytuesdayR::tt_load(2025, week = 30)
+
+movies <- 
+  readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-07-29/movies.csv')
+shows <- 
+  readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-07-29/shows.csv')
+
+```
+
+```{r}
+## Looking at movies & TV Shows individually & cleaning the data: 
+
+## movies: 
+movies_df <- 
+  movies |> select(- source) |> group_by(title) |> 
+  arrange(desc(hours_viewed)) |> ungroup(title) |> 
+  mutate(category = "movies")
+
+movies_top_10 <- 
+  movies_df |> slice(1:10) |> 
+  mutate(title = recode(title, 
+                        "Society of the Snow // La sociedad de la nieve" = 
+                          "Society of the Snow")) |> 
+  mutate(title = fct_reorder(title, hours_viewed))
+  
+
+
+## shows: 
+shows_df <- 
+  shows |> select(- source) |> group_by(title) |> 
+  arrange(desc(hours_viewed)) |> ungroup(title) |> 
+  mutate(category = "shows")
+
+shows_top_10 <- 
+  shows_df |> slice(1:10) |> 
+  mutate(title = recode(title, 
+                        "Squid Game: Season 2 // 오징어 게임: 시즌 2" = "Squid Game S2", 
+                        "Bridgerton: Season 3" = "Bridgerton S3", 
+                        "Fool Me Once: Limited Series" = "Fool Me Once", 
+                        "Queen of Tears: Limited Series // 눈물의 여왕: 리미티드 시리즈" = 
+                          "Queen of Tears", 
+                        "King the Land: Limited Series // 킹더랜드: 리미티드 시리즈" = 
+                          "King of the Land", 
+                        "Squid Game: Season 2 // 오징어 게임: 시즌 2" = "Squid Game S2", 
+                        "When Life Gives You Tangerines: Limited Series // 폭싹 속았수다: 리미티드 시리즈" = "When Life Gives You Tang", 
+                        "Adolescence: Limited Series" = "Adolescence", 
+                        "Monsters: The Lyle and Erik Menendez Story" = "Monsters", 
+                        "ONE PIECE: Season 1" = "One Piece")) |> 
+  mutate(title = fct_reorder(title, hours_viewed))
+  
+
+
+## Visualizing at most populat shows & TV shows by hours viewed
+
+## for movies
+ggplot(data = movies_top_10, aes(x = hours_viewed, y = title)) + 
+  geom_segment(aes(yend = title, x = 0, xend = hours_viewed), 
+               show.legend = FALSE) +
+  geom_point(color = "dodgerblue1", size = 1.5, show.legend = FALSE) + 
+  theme_minimal() + 
+  scale_size_manual(values = c(1, 0.5)) + 
+  labs(title = "Most Watched Movies by Hours Viewed in Half a Year", 
+       x = "Movie Title", y = "Hours Viewed")
+
+## for shows: 
+ggplot(data = shows_top_10, aes(x = hours_viewed, y = title)) + 
+  geom_segment(aes(yend = title, x = 0, xend = hours_viewed), show.legend = FALSE) + 
+  geom_point(color = "dodgerblue1", show.legend = FALSE) + 
+  theme_minimal() + 
+  scale_size_manual(values = c(1, 0.5)) + 
+  labs(title = "Most Watched Shows by Hours Viewed in Half a Year", 
+       x = "Show Title", y = "Hours Viewed")
+```
+
+For movies: Regarding movies, the most watched movie was Back in Action from January to June 2025, with about 313 million hours viewed. The next is Leave the World Behind with about 286 million hours viewed. What I find the most interesting of these 10 most watched movies, is that they are all originally produced movies by Netflix, and most of them are american movies.
+
+For shows: The most watched show is Squid Game, with more than 840 million hours views from January to June 2025, nonetheless, it also re-appears in the list, as the number 6th most viewed from July to December 2024 with 216 million hours views. It is important to note, that this is the same season 2, which makes this show and season the most viewed by far! Additionally, Bridgerton Season 3 and Fool me once (limited series) are next in the ranking. Answering out question of interest, regarding shows, None of these shows are american, they are all international with the exception of Monsters (Menendez Brother's story).
+
+Conclusion: There is a big difference in consumption between TV Shows and Movies on Netflix. I would infer that Netflix has a stronger marketing strategy for their own produced movies, and are widely consumed, as they are advertised strongly by the platform.
+
+Connection to class: I used the lolly plot, as this is more effective than using a bar plot for these types of quantitative & categorical variables. We are starting the scale at zero, so none of our results are misleading anyone, and we can see the actual overall trend of the views.

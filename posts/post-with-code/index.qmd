@@ -8,7 +8,7 @@ image: "image.jpg"
 
 ## Netflix Reports (Blog Post #1):
 
-Taken form the Tidy Tuesday GitHub (<https://github.com/rfordatascience/tidytuesday>) repository (Week 30 of 2025), the selected dataset looks at TV & Movie streaming data from Netflix. According to Tidy Tuesday, Netflix releases Engagement Reports which breakdown the amount of hours users have spent watching both Movies & TV Shows. In this blog post we will look at trying to visualize what are the most watched movies and TV shows in each report, and try to identify if the most watched shows / movies are american, or international!
+Taken form the Tidy Tuesday GitHub (<https://github.com/rfordatascience/tidytuesday>) repository (Week 30 of 2025), the selected dataset looks at TV & Movie streaming data from Netflix. According to Tidy Tuesday, Netflix releases Engagement Reports which breakdown the amount of hours users have spent watching both Movies & TV Shows. In this blog post we will look at trying to visualize what are the most watched movies and TV shows in each report, and try to identify if the most watched shows / movies are american, or international- generally, I think they will tend to be more international than american.
 
 ```{r}
 ## loading in packages: 
