@@ -2,97 +2,157 @@
 title: "Blog Post #1"
 author: "Alexa Santana"
 date: "2026-02-10"
-categories: [netflix, code, analysis]
-image: "netflix.png"
+categories: [slu, code, analysis]
+image: "thelmo.jpg"
 ---
 
-## Netflix Reports (Blog Post #1):
+## Thelmo Reports (Blog Post #2):
 
-Taken form the Tidy Tuesday GitHub (<https://github.com/rfordatascience/tidytuesday>) repository (Week 30 of 2025), the selected dataset looks at TV & Movie streaming data from Netflix. According to Tidy Tuesday, Netflix releases Engagement Reports which breakdown the amount of hours users have spent watching both Movies & TV Shows. In this blog post we will look at trying to visualize what are the most watched movies and TV shows in each report, and try to identify if the most watched shows / movies are american, or international!
+This data set was taken from a Thelmo Society meeting a month ago. The goal of the survey was the start a precedent of institutional data with the organization in hopes of building inclusive Senate bodies and hold other EBoard accountable.
+
+## Overall Involvement by Position
 
 ```{r}
-## loading in packages: 
+library(readr)
 library(tidyverse)
+library(gt)
+thelmo <- read_csv("data/thelmo.csv")
 
-## loading in the data: 
-tuesdata <- tidytuesdayR::tt_load(2025, week = 30)
+thelmo_df <- thelmo |> 
+  select(-5, -7, -9, -11, -13, -15, -17, -19, -21, -23)
 
-movies <- 
-  readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-07-29/movies.csv')
-shows <- 
-  readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-07-29/shows.csv')
+thelmo_df <- rename(thelmo_df,
+                    sportsteam = sportsteam...4,
+                    sportsclub = sportsclub...6, 
+                    greek = greek...8, 
+                    admissions = admissions...10, 
+                    ocip = ocip...12, 
+                    work = work...14, 
+                    theme = theme...16, 
+                    eboard = eboard...18, 
+                    none = none...20, 
+                    saac = saac...22)
 
+
+cat_thelmo_df <- 
+thelmo_df |> group_by(position) |>
+  summarise(sportsteam = sum(sportsteam), 
+            sportsclub = sum(sportsclub), 
+            greek = sum(greek), 
+            admissions = sum(admissions), 
+            ocip = sum(ocip), 
+            work = sum(work), 
+            theme = sum(theme), 
+            eboard = sum(eboard), 
+            none = sum(none))
+```
+
+## Overall Involvement
+
+```{r}
+cat_thelmo_df_long <-
+cat_thelmo_df |>
+  pivot_longer(cols = c(sportsteam, sportsteam, sportsclub, greek, admissions, 
+                        ocip, work, theme, eboard, none),
+               names_to = "involved", 
+               values_to = "count")
+
+
+total_involvement <- 
+  cat_thelmo_df |> 
+  ungroup() |> 
+  summarise(sportsteam = sum(sportsteam), 
+            sportsclub = sum(sportsclub), 
+            greek = sum(greek), 
+            admissions = sum(admissions), 
+            ocip = sum(ocip), 
+            work = sum(work), 
+            theme = sum(theme), 
+            eboard = sum(eboard), 
+            none = sum(none)) 
+```
+
+## Involvement (Percentage)
+
+```{r}
+percentage_involvement <- 
+  cat_thelmo_df |> 
+  ungroup() |> 
+  summarise(sportsteam = ((sum(sportsteam) / 53) * 100), 
+            sportsclub = ((sum(sportsclub) / 53) * 100), 
+            greek = ((sum(greek) / 53) * 100), 
+            admissions = ((sum(admissions) / 53) * 100), 
+            ocip = ((sum(ocip) / 53) * 100), 
+            work = ((sum(work) / 53) * 100), 
+            theme = ((sum(theme) / 53) * 100), 
+            eboard = ((sum(eboard) / 53) * 100), 
+            none = ((sum(none) / 53) * 100))
+
+```
+
+## Visualization of Involvement
+
+```{r}
+ggplot(data = cat_thelmo_df_long, aes(x = position, y = count, fill = position)) + 
+  geom_col() + 
+  facet_wrap(~ involved) + 
+  labs(title = "Senate Involvement (Spring '26)", 
+       y = "Number of Students", x = "Position in the Senate") + 
+  scale_y_continuous(limits = c(0, 17),
+    breaks = 1:17) +
+  theme(strip.text = element_text(face = "bold")) + 
+  scale_fill_manual(values = c(
+  "Chair"   = "#653A2B",
+  "ClubRep" = "#AA182C",
+  "Senator" = "#D5BA8C"))
 ```
 
 ```{r}
-## Looking at movies & TV Shows individually & cleaning the data: 
+## Tables
 
-## movies: 
-movies_df <- 
-  movies |> select(- source) |> group_by(title) |> 
-  arrange(desc(hours_viewed)) |> ungroup(title) |> 
-  mutate(category = "movies")
-
-movies_top_10 <- 
-  movies_df |> slice(1:10) |> 
-  mutate(title = recode(title, 
-                        "Society of the Snow // La sociedad de la nieve" = 
-                          "Society of the Snow")) |> 
-  mutate(title = fct_reorder(title, hours_viewed))
-  
-
-
-## shows: 
-shows_df <- 
-  shows |> select(- source) |> group_by(title) |> 
-  arrange(desc(hours_viewed)) |> ungroup(title) |> 
-  mutate(category = "shows")
-
-shows_top_10 <- 
-  shows_df |> slice(1:10) |> 
-  mutate(title = recode(title, 
-                        "Squid Game: Season 2 // 오징어 게임: 시즌 2" = "Squid Game S2", 
-                        "Bridgerton: Season 3" = "Bridgerton S3", 
-                        "Fool Me Once: Limited Series" = "Fool Me Once", 
-                        "Queen of Tears: Limited Series // 눈물의 여왕: 리미티드 시리즈" = 
-                          "Queen of Tears", 
-                        "King the Land: Limited Series // 킹더랜드: 리미티드 시리즈" = 
-                          "King of the Land", 
-                        "Squid Game: Season 2 // 오징어 게임: 시즌 2" = "Squid Game S2", 
-                        "When Life Gives You Tangerines: Limited Series // 폭싹 속았수다: 리미티드 시리즈" = "When Life Gives You Tang", 
-                        "Adolescence: Limited Series" = "Adolescence", 
-                        "Monsters: The Lyle and Erik Menendez Story" = "Monsters", 
-                        "ONE PIECE: Season 1" = "One Piece")) |> 
-  mutate(title = fct_reorder(title, hours_viewed))
-  
-
-
-## Visualizing at most populat shows & TV shows by hours viewed
-
-## for movies
-ggplot(data = movies_top_10, aes(x = hours_viewed, y = title)) + 
-  geom_segment(aes(yend = title, x = 0, xend = hours_viewed), 
-               show.legend = FALSE) +
-  geom_point(color = "dodgerblue1", size = 1.5, show.legend = FALSE) + 
-  theme_minimal() + 
-  scale_size_manual(values = c(1, 0.5)) + 
-  labs(title = "Most Watched Movies by Hours Viewed in Half a Year", 
-       x = "Movie Title", y = "Hours Viewed")
-
-## for shows: 
-ggplot(data = shows_top_10, aes(x = hours_viewed, y = title)) + 
-  geom_segment(aes(yend = title, x = 0, xend = hours_viewed), show.legend = FALSE) + 
-  geom_point(color = "dodgerblue1", show.legend = FALSE) + 
-  theme_minimal() + 
-  scale_size_manual(values = c(1, 0.5)) + 
-  labs(title = "Most Watched Shows by Hours Viewed in Half a Year", 
-       x = "Show Title", y = "Hours Viewed")
+# Fix pivot_longer
+cat_thelmo_df_long <-
+  cat_thelmo_df |>
+  pivot_longer(
+    cols = c(sportsteam, sportsclub, greek, admissions, ocip, work, 
+             theme, eboard, none),
+    names_to = "involved",
+    values_to = "count")
 ```
 
-For movies: Regarding movies, the most watched movie was Back in Action from January to June 2025, with about 313 million hours viewed. The next is Leave the World Behind with about 286 million hours viewed. What I find the most interesting of these 10 most watched movies, is that they are all originally produced movies by Netflix, and most of them are american movies.
+## Students Status:
 
-For shows: The most watched show is Squid Game, with more than 840 million hours views from January to June 2025, nonetheless, it also re-appears in the list, as the number 6th most viewed from July to December 2024 with 216 million hours views. It is important to note, that this is the same season 2, which makes this show and season the most viewed by far! Additionally, Bridgerton Season 3 and Fool me once (limited series) are next in the ranking. Answering out question of interest, regarding shows, None of these shows are american, they are all international with the exception of Monsters (Menendez Brother's story).
+```{r}
+## international students: 
 
-Conclusion: There is a big difference in consumption between TV Shows and Movies on Netflix. I would infer that Netflix has a stronger marketing strategy for their own produced movies, and are widely consumed, as they are advertised strongly by the platform.
+thelmo_ints <- 
+  thelmo_df |> group_by(status) |> 
+  count(status) |> 
+  ungroup() |>
+  mutate(percen_status = (n / 53) * 100) |> 
+  slice(1:2)
+  
 
-Connection to class: I used the lolly plot, as this is more effective than using a bar plot for these types of quantitative & categorical variables. We are starting the scale at zero, so none of our results are misleading anyone, and we can see the actual overall trend of the views.
+ggplot(data = thelmo_ints, aes(x = status, y = percen_status)) + 
+  geom_col(fill = "#AA182C") + 
+  labs(y = "Percentage of Senate", x = "Status", 
+       title = "Student Status (Spring '26)") + 
+  scale_y_continuous(limits = c(0, 90), breaks = seq(0, 90, by = 10))
+  
+```
+
+## Class Year Distribution:
+
+```{r}
+thelmo_class_year <- 
+  thelmo_df |> group_by(gradyear) |> 
+  count(gradyear) |> 
+  mutate(percen_classyear = (n / 53) * 100)
+
+ggplot(data = thelmo_class_year, aes(x = gradyear, y = percen_classyear)) + 
+  geom_col(fill = "#AA182C") + 
+  labs(y = "Percentage of Senate", x = "Class Year", 
+       title = "Student Class Year (Spring '26)") + 
+  scale_y_continuous(limits = c(0, 40), breaks = seq(0, 40, by = 5))
+
+```
