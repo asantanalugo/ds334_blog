@@ -1,21 +1,26 @@
 ---
 title: "Blog Post #2"
 author: "Alexa Santana"
-date: "2026-02-10"
+date: "2026-02-18"
 categories: [slu, code, analysis]
 image: "thelmo.jpg"
 ---
 
 ## Thelmo Reports (Blog Post #2):
 
-This data set was taken from a Thelmo Society meeting a month ago. The goal of the survey was the start a precedent of institutional data with the organization in hopes of building inclusive Senate bodies and hold other EBoard accountable.
+This data set was taken from a Thelmo Society (St. Lawrence University's Student Government) Senate meeting on February 4th, 2026. The goal of the survey was the start a precedent of collecting institutional data within the organization, with the ultimate goal of informing the yearly recruirment innitiatives to best build a Senate representative of the true population of St. Lawrence University and hold past/present Executive Boards accountable to that mission. The data has 53 observations (53 members of the Senate), it is important to note that it does not include Executive Board members.
 
-## Overall Involvement by Position
+There are three positions in the Senate, Club Representatives, Chairs and Senators, and they were all asked about their involvement on campus, as well as their student status (domestic or international). Within involvement, the questions asked were related to whether or not the student was involved in a Sports Team, Club Sports, Greek Life, Worked in Admissions, Worked as part of the On Campus Internship Program (OCIP), Worked on Campus, member of a Theme House, member of an Executive Board for a club/organization, or none of the above. It was also asked if they were members of the Student Athlete Advisory Committee (SAAC).
+
+## Overall Involvement by Position 
 
 ```{r}
+#| warning: false
+
 library(readr)
 library(tidyverse)
-library(gt)
+library(tibble)
+
 thelmo <- read_csv("thelmo.csv")
 
 thelmo_df <- thelmo |> 
@@ -45,11 +50,10 @@ thelmo_df |> group_by(position) |>
             theme = sum(theme), 
             eboard = sum(eboard), 
             none = sum(none))
-```
 
-## Overall Involvement
 
-```{r}
+## looking at involvement overall, not by position: 
+
 cat_thelmo_df_long <-
 cat_thelmo_df |>
   pivot_longer(cols = c(sportsteam, sportsteam, sportsclub, greek, admissions, 
@@ -88,36 +92,18 @@ percentage_involvement <-
             eboard = ((sum(eboard) / 53) * 100), 
             none = ((sum(none) / 53) * 100))
 
-```
+## Visualization: 
 
-## Visualization of Involvement
-
-```{r}
 ggplot(data = cat_thelmo_df_long, aes(x = position, y = count, fill = position)) + 
   geom_col() + 
   facet_wrap(~ involved) + 
   labs(title = "Senate Involvement (Spring '26)", 
        y = "Number of Students", x = "Position in the Senate") + 
-  scale_y_continuous(limits = c(0, 17),
-    breaks = 1:17) +
-  theme(strip.text = element_text(face = "bold")) + 
   scale_fill_manual(values = c(
   "Chair"   = "#653A2B",
   "ClubRep" = "#AA182C",
-  "Senator" = "#D5BA8C"))
-```
-
-```{r}
-## Tables
-
-# Fix pivot_longer
-cat_thelmo_df_long <-
-  cat_thelmo_df |>
-  pivot_longer(
-    cols = c(sportsteam, sportsclub, greek, admissions, ocip, work, 
-             theme, eboard, none),
-    names_to = "involved",
-    values_to = "count")
+  "Senator" = "#D5BA8C")) + 
+  theme_minimal()
 ```
 
 ## Students Status:
@@ -137,8 +123,7 @@ ggplot(data = thelmo_ints, aes(x = status, y = percen_status)) +
   geom_col(fill = "#AA182C") + 
   labs(y = "Percentage of Senate", x = "Status", 
        title = "Student Status (Spring '26)") + 
-  scale_y_continuous(limits = c(0, 90), breaks = seq(0, 90, by = 10))
-  
+  theme_minimal()
 ```
 
 ## Class Year Distribution:
@@ -153,6 +138,14 @@ ggplot(data = thelmo_class_year, aes(x = gradyear, y = percen_classyear)) +
   geom_col(fill = "#AA182C") + 
   labs(y = "Percentage of Senate", x = "Class Year", 
        title = "Student Class Year (Spring '26)") + 
-  scale_y_continuous(limits = c(0, 40), breaks = seq(0, 40, by = 5))
+  theme_minimal()
 
 ```
+
+One of our main goals as an Exec Board this semester, was to get a more representative Senate of the student body. There is no data to compare it to, but the feel from the last years is that there was an 'overpopulation' of international students, virtually no student athletes, and very little Greek Life representation. In this senate, the 6 chapters of Greek Life on campus are represented (about 20% of the senate is part of Greek Life), and, combined, more than 50% of the senate is part of a sport organization. The percentage of international students is almost exactly proportional to the real percentage of international students on campus, this senate has 11%, and SLU has 12%.
+
+It is important to note that this does not include the Executive Board, thus, excluding 6 students from the sample size. Considering that 4 out of the 6 Executive Board members are international students, this metric would be higher if they were to be included.
+
+Conclusion: Personally, I think this is a successful first step at accurately building a body represented of the student body. There biggest area of growth I can identify, is the difference between class years, as First Years and Sophomores are the most represented, which makes sense because of shifting time commitments and class difficulty as a students' major progresses.
+
+Connect to Class: I connect this a lot to the idea of how useful or accurate are barcharts for representing data. In this case, it is only looking at counts and percentages, and it is what I found to be the most accurate when representing it. Although, hopefully in a couple of years when the next Exec Board had more data, they can start plotting other graphs, to look at historical trends, and not only barcharts. Because these are only counts, I found that they were okay to use.
