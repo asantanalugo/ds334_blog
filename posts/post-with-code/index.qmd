@@ -2,7 +2,7 @@
 title: "Blog Post #2"
 author: "Alexa Santana"
 date: "2026-02-18"
-categories: [slu, code, analysis]
+categories: [code, analysis]
 image: "thelmo.jpg"
 ---
 
@@ -12,7 +12,7 @@ This data set was taken from a Thelmo Society (St. Lawrence University's Student
 
 There are three positions in the Senate, Club Representatives, Chairs and Senators, and they were all asked about their involvement on campus, as well as their student status (domestic or international). Within involvement, the questions asked were related to whether or not the student was involved in a Sports Team, Club Sports, Greek Life, Worked in Admissions, Worked as part of the On Campus Internship Program (OCIP), Worked on Campus, member of a Theme House, member of an Executive Board for a club/organization, or none of the above. It was also asked if they were members of the Student Athlete Advisory Committee (SAAC).
 
-## Overall Involvement by Position 
+## Overall Involvement by Position
 
 ```{r}
 #| warning: false

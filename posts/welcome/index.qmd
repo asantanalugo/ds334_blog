@@ -2,7 +2,7 @@
 title: "Blog Post #1"
 author: "Alexa Santana"
 date: "2026-02-10"
-categories: [netflix, code, analysis]
+categories: [code, analysis]
 image: "netflix.png"
 ---
 

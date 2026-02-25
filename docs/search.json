@@ -2,9 +2,9 @@
   {
     "objectID": "about.html",
     "href": "about.html",
-    "title": "About",
+    "title": "About This Blog",
     "section": "",
-    "text": "About this blog"
+    "text": "My name is Alexa, I’m currently a Junior at St. Lawrence University majoring in Statistics & Economics. This blog is part of my Data Visualization class, in which I am exploring different data sets of personal interest, and ways to visualize them!\nI am interested in behavioral economics, which is why I choose the Netflix consumption data set. I am also interested in using R for data visualization that is accessible to people without a Stats background. This motivated me to explore the data set from our own student government, for which I produced graphs that were shared with University Staff and a wide range of students."
   },
   {
     "objectID": "posts/welcome/index.html",
@@ -65,8 +65,8 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "ds334_blog",
+    "title": "Data Visualization Blog Posts",
     "section": "",
-    "text": "Blog Post #2\n\n\n\n\n\n\nslu\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\nFeb 18, 2026\n\n\nAlexa Santana\n\n\n\n\n\n\n\n\n\n\n\n\nBlog Post #1\n\n\n\n\n\n\nnetflix\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\nFeb 10, 2026\n\n\nAlexa Santana\n\n\n\n\n\n\nNo matching items"
+    "text": "Blog Post #2\n\n\n\n\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\nFeb 18, 2026\n\n\nAlexa Santana\n\n\n\n\n\n\n\n\n\n\n\n\nBlog Post #1\n\n\n\n\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\nFeb 10, 2026\n\n\nAlexa Santana\n\n\n\n\n\n\nNo matching items"
   }
 ]

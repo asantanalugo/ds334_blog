@@ -1,5 +1,5 @@
 ---
-title: "ds334_blog"
+title: "Data Visualization Blog Posts"
 listing:
   contents: posts
   sort: "date desc"

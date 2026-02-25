@@ -3,18 +3,18 @@ project:
   output-dir: docs
 
 website:
-  title: "ds334_blog"
+  title: "Data Visualization Blog"
   navbar:
     right:
       - about.qmd
       - icon: github
-        href: https://github.com/
-      - icon: twitter
-        href: https://twitter.com
+        href: https://github.com/asantanalugo
+      - icon: linkedin
+        href: https://www.linkedin.com/in/asantanalugo/
 format:
   html:
     theme:
-      - cosmo
+      - zephyr
       - brand
     css: styles.css
 
