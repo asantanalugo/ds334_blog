@@ -1,0 +1,132 @@
+---
+title: "Blog Post #3"
+author: "Alexa Santana"
+date: "2026-03-10"
+categories: [code, analysis]
+image: "venezuela.jpg"
+---
+
+## Venezuela's Development: Case Study (Blog Post #2)
+
+This data was taken from the already existing R package World Bank World Development Indicators (<https://tidy-intelligence.github.io/r-wbwdi/>). This package has the World Bank's indicators for economic development. For this blog post, I choose the "NY.GDP.MKTP.CD" variable, which Gross Domestic Product (in current USD, not adjusted for inflation). The goal of this blog post is to explore the data in the context of world GDP development from 1988 to 2016. I choose these years, as I am interested at looking how GDP had changed in the Venezuela particularly, and these were pivotal year peaks in Venezuelan GDP.
+
+```{r}
+#| warning: false
+
+## install.packages("wbwdi")
+
+library(wbwdi)
+library(tidyverse)
+library(maps)
+
+gdp <- 
+  wdi_get(
+  entities = "all",
+  indicators = c("NY.GDP.MKTP.CD"), 
+  start_year = 1985,
+  end_year = 2016)
+
+country <- wdi_get_entities() |> filter(entity_type == "country") |> 
+  mutate(entity_name = if_else(entity_name == "United States", 
+                           true = "USA", 
+                           false = entity_name)) |> 
+  mutate(entity_name = if_else(entity_name == "Venezuela, RB", 
+                           true = "Venezuela", 
+                           false = entity_name)) |> 
+  mutate(entity_name = if_else(entity_name == "Bosnia and Herzegovina", 
+                           true = "Bosnia", 
+                           false = entity_name)) |> 
+  mutate(entity_name = if_else(entity_name == "Russian Federation", 
+                           true = "Russia", 
+                           false = entity_name))
+
+gdp_test <- left_join(country, gdp, by = join_by(entity_id == entity_id)) |> 
+  select(-entity_id, -entity_iso2code, -entity_type, -capital_city, -region_id,
+         -region_iso2code, -admin_region_id, -admin_region_iso2code, -admin_region_name,
+         -income_level_iso2code, -income_level_iso2code, -income_level_id, -lending_type_id,
+         -lending_type_iso2code, -lending_type_name, -indicator_id) |> 
+  filter(year == "1988" | year == "2016") |> 
+  filter(!is.na(value)) 
+
+
+gdp_clean <-
+  gdp_test |> pivot_wider(names_from = year, values_from = value) |> 
+  filter(!is.na(`1988`)) |> 
+  filter(!is.na(`2016`)) |> 
+  mutate(diff = `2016` - `1988`) |> 
+  relocate(diff)
+
+most_developed <- 
+  gdp_clean |> 
+  arrange(desc(diff)) |> slice(1:10) |> 
+  mutate(entity_name = fct_reorder(entity_name, diff)) 
+
+least_developed <- 
+  gdp_clean |> 
+  arrange(diff) |> 
+  mutate(entity_name = fct_reorder(entity_name, diff)) |>
+  slice(1:10)
+
+
+ggplot(data = most_developed, aes(y = entity_name, x = diff)) + 
+  geom_col(fill = "darkolivegreen3", colour = "darkolivegreen") +
+  labs(title = "Most Change in GDP from 1988 to 2016", 
+       y = "Country", 
+       x = "Difference in GDP")
+
+ggplot(data = least_developed, aes(y = entity_name, x = diff)) + 
+  geom_col(fill = "skyblue3", colour = "skyblue") +
+  labs(title = "Least Change in GDP from 1988 to 2016", 
+       y = "Country", 
+       x = "Difference in GDP")
+
+```
+
+## World Map: 
+
+```{r}
+world_map <- map_data("world")
+
+gdp_clean_ven <- 
+  gdp_clean |> group_by(entity_name) |> 
+  mutate(higher_gdp = if_else(diff > 52688620469, 
+                              true = "Yes", 
+                              false = "No"))
+
+world_joined <- 
+  left_join(world_map, gdp_clean, join_by(region == entity_name))
+
+
+ggplot(data = world_joined, aes(x = long, y = lat, group = group)) + 
+  geom_polygon(aes(fill = diff)) + 
+  coord_map(projection = "mercator") + 
+  scale_fill_viridis_c() + 
+  xlim(c(-180, 180)) + 
+  labs(title = "Difference in GDP from 1988 to 2016")
+
+```
+
+Generally, there seems to be a wide gap in GDP growth. As seen in the map, there seem to be very few winners in the GDP growth context. Whereas, the rest of the world (majority) are a dark purple, indicating that they had the very least GDP growth. If we look at Venezuela, our country of interest, this holds. It seems to be in the darkest shade of dark purple.
+
+It is important to note, that during data exploration, Venezuela was not in the top 20 for least economic development. So the scale here is very extreme, where the biggest GDP growth is extremely large, compared to GDP Growth in other countries.
+
+## Conclusion & Connection to class: 
+
+In order to confirm the above, we can quickly calculate the mean GDP growth of the world and compare it to the top 10 GDP growth countries:
+
+```{r}
+## mean world: 
+gdp_clean |> summarise(mean(diff))
+
+## 316 Billion USD
+
+## mean top GDP growth: 
+most_developed |> summarise(mean(diff))
+
+## 3.7 Trillion USD
+
+```
+
+So, we can conclude that the mean GDP growth in the top ten countries is much larger than the rest of the world. Venezuela is in that 'rest of the world' category, not as extreme as the ones presented in this data set, which was my personal expectation at the beginning of this exploration.
+
+Connection to class: through maps, it was a good tool to look at overall world outliers, and look at the way that the data is 'distributed' without actually looking at the distribution. I think using a map in this context is the best way to get this disparity across to a non-stats background person.
