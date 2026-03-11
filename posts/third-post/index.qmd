@@ -8,7 +8,7 @@ image: "venezuela.jpg"
 
 ## Venezuela's Development: Case Study (Blog Post #2)
 
-This data was taken from the already existing R package World Bank World Development Indicators (<https://tidy-intelligence.github.io/r-wbwdi/>). This package has the World Bank's indicators for economic development. For this blog post, I choose the "NY.GDP.MKTP.CD" variable, which Gross Domestic Product (in current USD, not adjusted for inflation). The goal of this blog post is to explore the data in the context of world GDP development from 1988 to 2016. I choose these years, as I am interested at looking how GDP had changed in the Venezuela particularly, and these were pivotal year peaks in Venezuelan GDP.
+The data was taken from an already existing R package called "World Bank World Development Indicators" (<https://tidy-intelligence.github.io/r-wbwdi/>). This package has all of the World Bank's indicators for economic development. For this blog post, I choose the "NY.GDP.MKTP.CD" variable, which is Gross Domestic Product (in current USD, not adjusted for inflation). The goal of this blog post is to explore the data in the context of world GDP development from 1988 to 2016. I choose these years, as I am interested at looking how GDP had changed in contrast to the Venezuela economy particularly, and these were pivotal year peaks in Venezuelan GDP (source: World Bank Data).
 
 ```{r}
 #| warning: false
@@ -19,12 +19,16 @@ library(wbwdi)
 library(tidyverse)
 library(maps)
 
+## pulling data:
+
 gdp <- 
   wdi_get(
   entities = "all",
   indicators = c("NY.GDP.MKTP.CD"), 
   start_year = 1985,
   end_year = 2016)
+
+## making important countries consistant w/ 'map_data':
 
 country <- wdi_get_entities() |> filter(entity_type == "country") |> 
   mutate(entity_name = if_else(entity_name == "United States", 
@@ -40,6 +44,8 @@ country <- wdi_get_entities() |> filter(entity_type == "country") |>
                            true = "Russia", 
                            false = entity_name))
 
+## cleaning data:
+
 gdp_test <- left_join(country, gdp, by = join_by(entity_id == entity_id)) |> 
   select(-entity_id, -entity_iso2code, -entity_type, -capital_city, -region_id,
          -region_iso2code, -admin_region_id, -admin_region_iso2code, -admin_region_name,
@@ -48,13 +54,14 @@ gdp_test <- left_join(country, gdp, by = join_by(entity_id == entity_id)) |>
   filter(year == "1988" | year == "2016") |> 
   filter(!is.na(value)) 
 
-
 gdp_clean <-
   gdp_test |> pivot_wider(names_from = year, values_from = value) |> 
   filter(!is.na(`1988`)) |> 
   filter(!is.na(`2016`)) |> 
   mutate(diff = `2016` - `1988`) |> 
   relocate(diff)
+
+## creating plot data: 
 
 most_developed <- 
   gdp_clean |> 
@@ -67,6 +74,7 @@ least_developed <-
   mutate(entity_name = fct_reorder(entity_name, diff)) |>
   slice(1:10)
 
+## plots: 
 
 ggplot(data = most_developed, aes(y = entity_name, x = diff)) + 
   geom_col(fill = "darkolivegreen3", colour = "darkolivegreen") +
@@ -85,6 +93,8 @@ ggplot(data = least_developed, aes(y = entity_name, x = diff)) +
 ## World Map: 
 
 ```{r}
+## data for map:
+
 world_map <- map_data("world")
 
 gdp_clean_ven <- 
@@ -96,6 +106,7 @@ gdp_clean_ven <-
 world_joined <- 
   left_join(world_map, gdp_clean, join_by(region == entity_name))
 
+## world map:
 
 ggplot(data = world_joined, aes(x = long, y = lat, group = group)) + 
   geom_polygon(aes(fill = diff)) + 
@@ -106,9 +117,9 @@ ggplot(data = world_joined, aes(x = long, y = lat, group = group)) +
 
 ```
 
-Generally, there seems to be a wide gap in GDP growth. As seen in the map, there seem to be very few winners in the GDP growth context. Whereas, the rest of the world (majority) are a dark purple, indicating that they had the very least GDP growth. If we look at Venezuela, our country of interest, this holds. It seems to be in the darkest shade of dark purple.
+Generally, there seems to be a wide gap in GDP growth. As seen in the map, there are very few 'winners' in the GDP growth context (closer to Yellow in the scale). Whereas, the rest of the world (majority) are a dark purple, indicating that they had the very least GDP growth. If we look at Venezuela, our country of interest, this holds. It seems to be in the darkest shade of dark purple.
 
-It is important to note, that during data exploration, Venezuela was not in the top 20 for least economic development. So the scale here is very extreme, where the biggest GDP growth is extremely large, compared to GDP Growth in other countries.
+It is important to note, that during data exploration, Venezuela was not in the top 20 for least economic development. This tells us that the scale here is very extreme, where the biggest GDP growth is extremely large, compared to GDP Growth in other countries.
 
 ## Conclusion & Connection to class: 
 
