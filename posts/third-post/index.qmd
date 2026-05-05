@@ -90,7 +90,7 @@ ggplot(data = least_developed, aes(y = entity_name, x = diff)) +
 
 ```
 
-## World Map: 
+## World Map:
 
 ```{r}
 ## data for map:
@@ -121,7 +121,7 @@ Generally, there seems to be a wide gap in GDP growth. As seen in the map, there
 
 It is important to note, that during data exploration, Venezuela was not in the top 20 for least economic development. This tells us that the scale here is very extreme, where the biggest GDP growth is extremely large, compared to GDP Growth in other countries.
 
-## Conclusion & Connection to class: 
+## Conclusion & Connection to class:
 
 In order to confirm the above, we can quickly calculate the mean GDP growth of the world and compare it to the top 10 GDP growth countries:
 

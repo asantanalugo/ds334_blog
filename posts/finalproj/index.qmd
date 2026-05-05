@@ -1,0 +1,196 @@
+---
+title: "Final Project"
+author: "Alexa Santana"
+date: "2026-05-04"
+categories: [code, analysis]
+image: "collapse.jpg"
+---
+
+# Trading Volatility and Volume During Financial Crises across industry ETFs
+
+## Abstract:
+
+This research project will look at exploring the relationship between the daily volatility in price in different industry's Exchange Traded Funds (ETFs), and how trading volume impacts it during financial crises. The data was taken from the 'quantmod()' package, which scrapes data Price and Volume data from YahooFinance. There is strong statistical evidence showing positive correlation between Volume traded and Daily Price changes in an ETF. This conclusion was further explored through visualizations of Volume during financial crises.
+
+## Relevant Visualizations:
+
+```{r output = FALSE, echo = FALSE}
+## loading in data and packages: 
+
+library(quantmod)
+library(lubridate)
+library(tidyverse)
+
+start <- ymd("2008-01-01")
+end <- ymd("2026-05-01")
+
+## getting symbols of the 
+getSymbols(c("SPY", "QQQ", "XLV", "XLF", "XLE", "VNQ"), src = "yahoo",
+           from = start, to = end)
+
+date_tib <- as_tibble(index(SPY)) |>
+  rename(start_date = value)
+
+qqq_tib <- as_tibble(QQQ)
+spy_tib <- as_tibble(SPY)
+xlv_tib <- as_tibble(XLV)
+xlf_tib <- as_tibble(XLF)
+xle_tib <- as_tibble(XLE)
+vnq_tib <- as_tibble(VNQ)
+
+all_stocks <- bind_cols(date_tib, qqq_tib, spy_tib, xlv_tib, xlf_tib, xle_tib, vnq_tib)
+
+
+stocks_long <- all_stocks |>
+  dplyr::select(start_date, SPY.Adjusted, QQQ.Adjusted, XLV.Adjusted, XLF.Adjusted,
+                XLE.Adjusted, VNQ.Adjusted) |>
+  pivot_longer(2:7, names_to = "Stock_Type", values_to = "Price") |>
+  mutate(Stock_Type = fct_recode(Stock_Type,
+                                 SYP = "SPY.Adjusted",
+                                 QQQ = "QQQ.Adjusted",
+                                 XLV = "XLV.Adjusted", 
+                                 XLF = "XLF.Adjusted", 
+                                 XLE = "XLE.Adjusted", 
+                                 VNQ = "VNQ.Adjusted"
+                                 ))
+
+stocks_qqq <- stocks_long |> filter(Stock_Type == "QQQ")
+stocks_spy <- stocks_long |> filter(Stock_Type == "SYP")
+stocks_xlv <- stocks_long |> filter(Stock_Type == "XLV")
+stocks_xlf <- stocks_long |> filter(Stock_Type == "XLF")
+stocks_xle <- stocks_long |> filter(Stock_Type == "XLE")
+stocks_vnq <- stocks_long |> filter(Stock_Type == "VNQ")
+```
+
+One of the key motivations for this project was going beyond price changes to isolate volatility in the markets. A key factor that moves markets are news and macroeconomic conditions. Thus, I want to show these market conditions and volatility across industries, not only in prices, but also in Volume traded.
+
+My expectation is that Volume will be strongly correlated with price, as volume is the mechanism that moves price (Supply and Demand), yet, what ultimatly is affected before price (hypothesis) is volume. Thus, the reason I make a distinction and want to statistically test, as well as visualize it.
+
+Since most volatility charts are shown through changes in price in the media and in intro to finance classes, the first visualization is the change in price. I have taken the time period from January 2008 to May 4th (deadline of this project), as this time period lets us explore two financial crises; the 2008 financial crisis and the 2020 Covid-19 pandemic.
+
+```{r}
+## comparing them through time: 
+
+ggplot(data = stocks_long, aes(x = start_date, y = Price)) +
+  geom_line(aes(colour = Stock_Type)) +
+  geom_area(aes(fill = Stock_Type), alpha = 0.2, position = "identity") +
+  theme_minimal() +
+  scale_colour_viridis_d() +
+  scale_fill_viridis_d() + 
+  labs(title = "Changes in Price from 2008 to 2026",
+       y = "Price (Adjusted)",
+       x = "Date")
+```
+
+Looking only at price, the visual correlation between QQQ (tech within the S&P) and the S&P 500 is close. This can be explained, as about 40% of the weight within the S&P 500 is only tech stocks.
+
+### Volatility meassures:
+
+```{r output = FALSE, echo = FALSE}
+## cleaning data for volume: 
+
+library(scales) ## for volume viz, makes y axis numbers, and not scientific 
+## notation, source in appendix
+
+stocks_volume <- all_stocks |>
+  dplyr::select(start_date, QQQ.Volume, SPY.Volume, XLV.Volume, XLF.Volume,
+                XLE.Volume, VNQ.Volume) |>
+  pivot_longer(2:7, names_to = "Stock_Type", values_to = "Volume") |>
+  mutate(Stock_Type = fct_recode(Stock_Type,
+                                 QQQ = "QQQ.Volume",
+                                 SPY = "SPY.Volume",
+                                 XLV = "XLV.Volume", 
+                                 XLF = "XLF.Volume", 
+                                 XLE = "XLE.Volume", 
+                                 VNQ = "VNQ.Volume"
+                                 ))
+
+vol_qqq <- stocks_volume |> filter(Stock_Type == "QQQ")
+vol_spy <- stocks_volume |> filter(Stock_Type == "sandp")
+vol_xlv <- stocks_volume |> filter(Stock_Type == "XLV")
+vol_xlf <- stocks_volume |> filter(Stock_Type == "XLF")
+vol_xle <- stocks_volume |> filter(Stock_Type == "XLE")
+vol_vnq <- stocks_volume |> filter(Stock_Type == "VNQ")
+
+stocks_rel <- stocks_volume |>
+  filter(Stock_Type %in% c("QQQ", "SPY"))
+```
+
+```{r}
+ggplot(data = stocks_volume, aes(x = start_date, y = Volume)) +
+  geom_line(aes(colour = Stock_Type)) +
+  geom_area(aes(fill = Stock_Type), alpha = 0.2, position = "identity") +
+  theme_minimal() +
+  scale_colour_viridis_d() +
+  scale_fill_viridis_d() + 
+  scale_y_continuous(labels = label_number()) + 
+  labs(title = "Changes in Volume from 2008 to 2026",
+       y = "Volume",
+       x = "Date")
+```
+
+When looking at the volume, even as the y-axis scale changes from price to number of trades (definition of volume), the correlation is still there, although the gap between the two seems to be wider. There is much more volume traded with the S&P 500 than in QQQ. This could be due to the fact that less people own QQQ than the S&P 500, or that investors are more confident in keeping QQQ than S&P 500 as a whole, and are thus less responsive to market movements.
+
+### Looking at the Model (Correlation between Volatility & Volume)
+
+```{r output = FALSE, echo = FALSE}
+## making the data set for the general model: 
+stocks_long <- 
+  all_stocks |>
+  pivot_longer(cols = -start_date,
+               names_to = c("stock_type", ".value"),
+               names_sep = "\\.")
+
+## creating a log variable (dependent variable for the model)
+## creating volatility in the difference between high and low
+## creating return of the Adjusted price, adjusted minus last days price over the same
+
+stocks_long <- stocks_long |> 
+  group_by(stock_type) |> 
+  mutate(log_volume = log(Volume), 
+         volatility = High - Low, 
+         stock_type = factor(stock_type)) 
+
+## building the model: 
+library(faraway)
+library(broom)
+library(GGally)
+library(openintro)
+library(tidyverse)
+library(ggeffects)
+library(pander)
+
+mod <- lm(volatility ~ log_volume + stock_type + log_volume:stock_type,
+               data = stocks_long)
+
+
+mod_pred <- 
+  ggpredict(mod, terms = c("log_volume [all]", 
+                           "stock_type")) |> 
+  as.data.frame(terms_to_colnames = TRUE) |> 
+  as_tibble()
+```
+
+When building the model, we take the log version of volume, as it is a highly skewed variable, and we are trying to not violate model assumptions.
+
+```{r}
+mod |> tidy() |> pander()
+
+## mod viz 
+
+ggplot(data = stocks_long, aes(x = log_volume, y = volatility)) +
+  scale_colour_viridis_d() +
+  geom_point(aes(colour = stock_type), alpha = 0.10) +
+  geom_line(data = mod_pred, aes(x = log_volume, y = predicted), linewidth = 0.8) +
+  facet_wrap(~ stock_type) +
+  theme_minimal() +
+  labs(y = "Daily Volatility In Price",
+       x = "Trading Volume (log())",
+       title = "How Trading Volume Predicts Daily Price Volatility")
+```
+
+Through the model output and the visualization, we can see that there is evidence of a positive linear relationship between daily volatility in price and trading volume. This supports the idea that volume can be used as an indicator for volatility in markets; the greater the volume, the more volatility there is in terms of price change per day.
+
+QQQ and SPY seem to have different behaviors compared to the other ETFs, which makes sense as the S&P 500 is highly responsive to the market, and QQQ is highly correlated to the S&P 500.
+
+Regarding the interaction term, I wanted to test of the effects of volume were different for each industry, which does seem to be the case. The higher the volume affects each industry differently. Our base group being QQQ, the coefficients are negative, which indicate that the effects are on average lower for the industries that aren't QQQ.
