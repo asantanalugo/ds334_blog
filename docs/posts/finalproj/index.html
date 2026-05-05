@@ -226,8 +226,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Looking only at price, the visual correlation between QQQ (tech within the S&amp;P) and the S&amp;P 500 is close. This can be explained, as about 40% of the weight within the S&amp;P 500 is only tech stocks.</p>
-<section id="volatility-meassures" class="level3">
-<h3 class="anchored" data-anchor-id="volatility-meassures">Volatility meassures:</h3>
+<section id="volatility-measures" class="level3">
+<h3 class="anchored" data-anchor-id="volatility-measures">Volatility measures:</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> stocks_volume, <span class="fu">aes</span>(<span class="at">x =</span> start_date, <span class="at">y =</span> Volume)) <span class="sc">+</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">colour =</span> Stock_Type)) <span class="sc">+</span></span>

@@ -24,7 +24,7 @@ library(tidyverse)
 start <- ymd("2008-01-01")
 end <- ymd("2026-05-01")
 
-## getting symbols of the 
+## getting symbols of the ETFs
 getSymbols(c("SPY", "QQQ", "XLV", "XLF", "XLE", "VNQ"), src = "yahoo",
            from = start, to = end)
 
@@ -84,13 +84,12 @@ ggplot(data = stocks_long, aes(x = start_date, y = Price)) +
 
 Looking only at price, the visual correlation between QQQ (tech within the S&P) and the S&P 500 is close. This can be explained, as about 40% of the weight within the S&P 500 is only tech stocks.
 
-### Volatility meassures:
+### Volatility measures:
 
 ```{r output = FALSE, echo = FALSE}
 ## cleaning data for volume: 
 
-library(scales) ## for volume viz, makes y axis numbers, and not scientific 
-## notation, source in appendix
+library(scales)
 
 stocks_volume <- all_stocks |>
   dplyr::select(start_date, QQQ.Volume, SPY.Volume, XLV.Volume, XLF.Volume,
